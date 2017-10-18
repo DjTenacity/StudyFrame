@@ -12,7 +12,8 @@ import java.util.List;
 public class UserDao extends BaseDao {
     @Override
     protected String createTable() {
-        return "create table if not exists tb_user(name varchar(20),password var char(10))";
+       // return "create table if not exists tb_user(user_Id int,name varchar(20),password var char(10))";
+        return "create table if not exists tb_user(user_Id int,name varchar(20),password varchar(10))";
     }
 
     @Override

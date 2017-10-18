@@ -48,10 +48,10 @@
         app:layout_constraintVertical_bias="0.058" />
 
     <TextView
+        android:id="@+id/tv1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@color/colorAccent"
-        android:onClick="query"
         android:padding="16dp"
         android:text="查"
         app:layout_constraintBottom_toBottomOf="parent"

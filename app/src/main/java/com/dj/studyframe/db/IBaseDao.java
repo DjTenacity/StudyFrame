@@ -3,7 +3,8 @@ package com.dj.studyframe.db;
 import java.util.List;
 
 /**
- * Comment:
+ * Comment:数据库,
+ * 升级 --> 将旧表备份重命名,然后再将以前表的数据存到新表里面去,再将旧表的数据进行一个拷贝
  *
  * @param <T> the type parameter
  * @author :DJ鼎尔东 / 1757286697@qq.cn

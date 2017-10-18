@@ -138,7 +138,7 @@ public abstract class BaseDao<T> implements IBaseDao<T> {
                 cacheKey = colmunToFiled.getAnnotation(DBFiled.class).value();
             }
             try {
-                if (null == colmunToFiled.get(entity).toString()) {
+                if (null == colmunToFiled.get(entity)) {
                     continue;
                 }
                 cacheValue = colmunToFiled.get(entity).toString();
@@ -191,20 +191,37 @@ public abstract class BaseDao<T> implements IBaseDao<T> {
         return result;
     }
 
-    @Override
+
     public int delete(T where) {
+        Map map=getValues(where);
+
+        Condition condition=new Condition(map);
+        /**
+         * id=1 数据
+         * id=?      new String[]{String.value(1)}
+         */
+        int result=database.delete(tableName,condition.getWhereClause(),condition.getWhereArgs());
+        Log.w("deleteRESULT", result + "result");
+
+        return result;
+    }
+
+    public int delete2(T where) {
         Map map = getValues(where);
         Condition condition = new Condition(map);
         /**
          * id=1 数据
          * id=? new String[]{String.valuse(1)}*/
         int result = database.delete(tableName, condition.getWhereClause(), condition.getWhereArgs());
+        Log.w("deleteRESULT", result + "result");
 
         return result;
     }
 
     @Override
     public List<T> query(T where) {
+        Log.w("queryRESULT", "query0result");
+
         return query(where, null, null, null);
     }
 
@@ -219,9 +236,13 @@ public abstract class BaseDao<T> implements IBaseDao<T> {
         if (startIndex != null && limit != null) {
             limitStr = startIndex + " , " + limit;
         }
+        Log.w("queryRESULT", "query0result");
+
         Condition condition = new Condition(map);
         Cursor cursor = database.query(tableName, null, condition.getWhereClause(), condition.getWhereArgs(),
                 null, null, orderBy, limitStr);
+
+        Log.w("queryRESULT", "query1result");
 
         List<T> result = getResult(cursor, where);
 
@@ -230,6 +251,8 @@ public abstract class BaseDao<T> implements IBaseDao<T> {
 
     //内连接,两个数据库通过字段连接,拿第一数据库的查询结果去查第二个数据库的
     private List<T> getResult(Cursor cursor, T where) {
+        Log.w("queryRESULT", "query2result");
+
         ArrayList list = new ArrayList();
         Object item;
         while (cursor.moveToNext()) {
@@ -249,21 +272,23 @@ public abstract class BaseDao<T> implements IBaseDao<T> {
 
                     Field field = (Field) entry.getValue();
                     Class type = field.getType();
-                    if (type == String.class) {
-                        //反射创建方式赋值
-                        String content = cursor.getString(columnIndex);
-                        field.set(item, content);
-                    } else if (type == Double.class) {
-                        field.set(item, cursor.getDouble(columnIndex));
-                    } else if (type == Long.class) {
-                        field.set(item, cursor.getLong(columnIndex));
-                    } else if (type == Integer.class) {
-                        field.set(item, cursor.getInt(columnIndex));
-                    } else if (type == byte[].class) {
-                        field.set(item, cursor.getBlob(columnIndex));
-                    } else {
-                        /**不支持的类型*/
-                        continue;
+                    if (columnIndex != -1) {
+                        if (type == String.class) {
+                            //反射创建方式赋值
+                            String content = cursor.getString(columnIndex);
+                            field.set(item, content);
+                        } else if (type == Double.class) {
+                            field.set(item, cursor.getDouble(columnIndex));
+                        } else if (type == Long.class) {
+                            field.set(item, cursor.getLong(columnIndex));
+                        } else if (type == Integer.class) {
+                            field.set(item, cursor.getInt(columnIndex));
+                        } else if (type == byte[].class) {
+                            field.set(item, cursor.getBlob(columnIndex));
+                        } else {
+                            /**不支持的类型*/
+                            continue;
+                        }
                     }
                 }
 
@@ -277,8 +302,69 @@ public abstract class BaseDao<T> implements IBaseDao<T> {
             }
 
         }
+        Log.w("queryRESULT", "query" + list.size() + "result");
+
         return list;
     }
+
+    private List<T> getResult2(Cursor cursor, T where) {
+        ArrayList list = new ArrayList();
+
+        Object item;
+        while (cursor.moveToNext()) {
+            try {
+                item = where.getClass().newInstance();
+                /**
+                 * 列名  name
+                 * 成员变量名  Filed;
+                 */
+                Iterator iterator = cacheMap.entrySet().iterator();
+                while (iterator.hasNext()) {
+                    Map.Entry entry = (Map.Entry) iterator.next();
+                    /**
+                     * 得到列名
+                     */
+                    String colomunName = (String) entry.getKey();
+                    /**
+                     * 然后以列名拿到  列名在游标的位子
+                     */
+                    Integer colmunIndex = cursor.getColumnIndex(colomunName);
+
+                    Field field = (Field) entry.getValue();
+
+                    Class type = field.getType();
+                    if (colmunIndex != -1) {
+                        if (type == String.class) {
+                            //反射方式赋值
+                            field.set(item, cursor.getString(colmunIndex));
+                        } else if (type == Double.class) {
+                            field.set(item, cursor.getDouble(colmunIndex));
+                        } else if (type == Integer.class) {
+                            field.set(item, cursor.getInt(colmunIndex));
+                        } else if (type == Long.class) {
+                            field.set(item, cursor.getLong(colmunIndex));
+                        } else if (type == byte[].class) {
+                            field.set(item, cursor.getBlob(colmunIndex));
+                            /*
+                            不支持的类型
+                             */
+                        } else {
+                            continue;
+                        }
+                    }
+
+                }
+                list.add(item);
+            } catch (InstantiationException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+
+        }
+        return list;
+    }
+
 
     /**
      * 创建表
