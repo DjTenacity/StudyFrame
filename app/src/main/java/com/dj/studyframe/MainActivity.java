@@ -11,6 +11,8 @@ import com.dj.studyframe.db.IBaseDao;
 import com.dj.studyframe.db.UserDao;
 import com.dj.studyframe.db.entity.FileBean;
 import com.dj.studyframe.db.entity.User;
+import com.dj.studyframe.http.Volley;
+import com.dj.studyframe.http.interfaces.IDataListener;
 
 import java.util.List;
 
@@ -97,5 +99,19 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    void http() {
+        User user = new User();
 
+        Volley.sendRequset(user, "url", String.class, new IDataListener() {
+            @Override
+            public void onSuccess(Object o) {
+
+            }
+
+            @Override
+            public void onFail() {
+
+            }
+        });
+    }
 }
