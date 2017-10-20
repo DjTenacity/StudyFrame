@@ -27,8 +27,6 @@ public class Volley {
         /**策略模式*/
         IHttpService httpService = new JsonHttpService();
         IHttpListener httpListener = new JsonDealListener<>(response, dataListener);
-        requestHolder.setHttpListener(httpListener);
-
         requestHolder.setHttpService(httpService);
         requestHolder.setHttpListener(httpListener);
 

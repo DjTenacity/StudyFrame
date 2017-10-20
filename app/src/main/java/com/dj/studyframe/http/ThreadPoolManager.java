@@ -11,7 +11,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Comment:
+ * Comment:线程管理
  *
  * @author :DJ鼎尔东 / 1757286697@qq.cn
  * @version : Administrator1.0
@@ -36,7 +36,7 @@ public class ThreadPoolManager {
 
     public ThreadPoolManager() {
         threadPoolExecutor = new ThreadPoolExecutor(4, 10, 10, TimeUnit.SECONDS,
-                new ArrayBlockingQueue<Runnable>(4));
+                new ArrayBlockingQueue<Runnable>(4), handler);
 
         threadPoolExecutor.execute(runnable);
     }

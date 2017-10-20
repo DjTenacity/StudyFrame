@@ -32,7 +32,6 @@ public class User {
     /**
      * 必须要用int的封装类型,基本数据类型int有默认值->0
      */
-    @DBFiled("user_Id")
     public int user_Id = 0;
     //通过注解找到name
     @DBFiled("name")
@@ -57,11 +56,11 @@ public class User {
         this.password = password;
     }
 
-    public Integer getuser_Id() {
+    public Integer getUser_Id() {
         return user_Id;
     }
 
-    public void setuser_Id(Integer user_Id) {
+    public void setUser_Id(Integer user_Id) {
         this.user_Id = user_Id;
     }
 

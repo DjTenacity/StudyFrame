@@ -40,11 +40,10 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 User where = new User();
                 where.setName("gdjLove");
-                where.setuser_Id(6);
+                where.setUser_Id(6);
 
                 List<User> userList = baseDao.query(where);
-                Log.w("queryRESULT", "查询到   条数据");
-
+                Log.w("queryRESULT", "查询数据");
 
                 if (userList != null && userList.size() > 0) {
 
@@ -62,10 +61,10 @@ public class MainActivity extends AppCompatActivity {
         User user2 = new User();
         user2.password = "22222";
         user2.name = "woaini";
-        user2.setuser_Id(2);
+        user2.setUser_Id(2);
 
         User user3 = new User("gdjLove", "ps123456");
-        user3.setuser_Id(6);
+        user3.setUser_Id(6);
 
         baseDao.insert(user);
         baseDao.insert(user2);
@@ -82,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
         where.setName("woaini");
 
         User user = new User("lovedj", "ps12345678");
-        user.setuser_Id(5);
+        user.setUser_Id(5);
         baseDao.updata(user, where);
 
     }
@@ -99,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    void http() {
+    void http() {//适合小数据,大并发
         User user = new User();
 
         Volley.sendRequset(user, "url", String.class, new IDataListener() {
