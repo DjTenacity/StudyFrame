@@ -1,6 +1,7 @@
 package com.dj.studyframe.http;
 
 import com.alibaba.fastjson.JSON;
+import com.dj.studyframe.http.interfaces.IHttpListener;
 import com.dj.studyframe.http.interfaces.IHttpService;
 
 import java.io.UnsupportedEncodingException;
@@ -17,19 +18,25 @@ public class HttpTask<T> implements Runnable {
     private IHttpService httpService;
 
     public HttpTask(RequestHolder<T> requestHolder) {
+
         httpService = requestHolder.getHttpService();
         httpService.setHttpListener(requestHolder.getHttpListener());
-
         httpService.setUrl(requestHolder.getUrl());
 
-        T request = requestHolder.getRequestInfo();
-        String requestInfo = JSON.toJSONString(request);
+        //增加方法
+        IHttpListener httpListener = requestHolder.getHttpListener();
+        httpListener.addHttpHeader(httpService.getHttpHeardMap());
 
-        try {
-            httpService.setRequestData(requestInfo.getBytes("UTF-8"));
-        } catch (Exception e) {
-            e.printStackTrace();
+        T request = requestHolder.getRequestInfo();
+        if (request != null) {
+            String requestInfo = JSON.toJSONString(request);
+            try {
+                httpService.setRequestData(requestInfo.getBytes("UTF-8"));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
+
     }
 
     @Override

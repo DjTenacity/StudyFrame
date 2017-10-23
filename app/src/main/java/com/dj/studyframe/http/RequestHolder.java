@@ -4,7 +4,7 @@ import com.dj.studyframe.http.interfaces.IHttpListener;
 import com.dj.studyframe.http.interfaces.IHttpService;
 
 /**
- * Comment:
+ * Comment:请求数据
  *
  * @author :DJ鼎尔东 / 1757286697@qq.cn
  * @version : Administrator1.0

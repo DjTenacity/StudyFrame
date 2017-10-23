@@ -98,7 +98,10 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public  static  final String url="http://v.juhe.cn/toutiao/index?type=top&key=29da5e8be9ba88b932394b7261092f71";
+
     void http() {//适合小数据,大并发
+
         User user = new User();
 
         Volley.sendRequset(user, "url", String.class, new IDataListener() {

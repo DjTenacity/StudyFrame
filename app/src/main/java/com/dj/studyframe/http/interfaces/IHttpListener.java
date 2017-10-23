@@ -2,6 +2,8 @@ package com.dj.studyframe.http.interfaces;
 
 import org.apache.http.HttpEntity;
 
+import java.util.Map;
+
 /**
  * Comment:处理结果 回调
  *
@@ -17,4 +19,7 @@ public interface IHttpListener {
     void onSuccess(HttpEntity httpEntity);
 
     void onFail();
+
+    void addHttpHeader(Map<String, String> headerMap);
+
 }
