@@ -29,4 +29,9 @@ public class FileDao extends BaseDao {
     public List query(Object where, String orderBy, Integer startIndex, Integer limit) {
         return null;
     }
+
+    @Override
+    public List query(String sql) {
+        return null;
+    }
 }

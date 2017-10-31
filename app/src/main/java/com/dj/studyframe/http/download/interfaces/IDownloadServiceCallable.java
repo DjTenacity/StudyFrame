@@ -1,9 +1,8 @@
-package com.dj.studyframe.http.download;
+package com.dj.studyframe.http.download.interfaces;
 
 
-/**
- * Created by david on 2017/1/12.
- */
+import com.dj.studyframe.http.download.DownloadItemInfo;
+
 public interface IDownloadServiceCallable {
     void onDownloadStatusChanged(DownloadItemInfo downloadItemInfo);
 

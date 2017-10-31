@@ -1,7 +1,5 @@
 package com.dj.studyframe.http.interfaces;
 
-import org.apache.http.HttpEntity;
-
 import java.util.Map;
 
 /**
@@ -30,6 +28,8 @@ public interface IHttpService {
 
     /**
      * 设置请求参数
+     * String  1
+     * byte[]  2
      */
     void setRequestData(byte[] requestData);
 

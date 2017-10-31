@@ -3,6 +3,9 @@ package com.dj.studyframe.http.download;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.dj.studyframe.http.download.enums.DownloadStatus;
+import com.dj.studyframe.http.download.interfaces.IDownLitener;
+import com.dj.studyframe.http.download.interfaces.IDownloadServiceCallable;
 import com.dj.studyframe.http.interfaces.IHttpService;
 
 import org.apache.http.HttpEntity;
@@ -21,37 +24,71 @@ import java.util.Map;
  * @version : Administrator1.0
  * @date : 2017/10/22
  */
-public class DownloadListener implements IDownListener {
-    private DownloadItemInfo downloadItemInfo;
+
+public class DownloadListener implements IDownLitener {
+
+    private  DownloadItemInfo downloadItemInfo;
+
     private File file;
-    protected String url;
-    /**
-     * 下载进度
-     */
+    protected  String url;
     private long breakPoint;
-    /**
-     * 观察者
-     */
     private IDownloadServiceCallable downloadServiceCallable;
+
     private IHttpService httpService;
     /**
      * 得到主线程
      */
-    private Handler handler = new Handler(Looper.getMainLooper());
-
-    public DownloadListener(DownloadItemInfo downloadItemInfo, IDownloadServiceCallable downloadServiceCallable, IHttpService httpService) {
+    private Handler handler=new Handler(Looper.getMainLooper());
+    public DownloadListener(DownloadItemInfo downloadItemInfo,
+                            IDownloadServiceCallable downloadServiceCallable,
+                            IHttpService httpService) {
         this.downloadItemInfo = downloadItemInfo;
         this.downloadServiceCallable = downloadServiceCallable;
         this.httpService = httpService;
-        this.file = new File(downloadItemInfo.getFilePath());
-        /**得到已经下载的长度*/
-        this.breakPoint = file.length();
+        this.file=new File(downloadItemInfo.getFilePath());
+        /**
+         * 得到已经下载的长度
+         */
+        this.breakPoint=file.length();
     }
 
+    /**
+     * 2
+     * @param headerMap
+     */
+    public void addHttpHeader(Map<String,String> headerMap)
+    {
+        long length=getFile().length();
+        if(length>0L)
+        {
+            headerMap.put("RANGE","bytes="+length+"-");
+        }
+
+    }
+    public DownloadListener(DownloadItemInfo downloadItemInfo) {
+        this.downloadItemInfo = downloadItemInfo;
+    }
+
+    @Override
+    public void setHttpServive(IHttpService httpServive) {
+        this.httpService=httpServive;
+    }
+
+    /**
+     * 设置取消接口
+     */
+    @Override
+    public void setCancleCalle() {
+
+    }
+
+    @Override
+    public void setPuaseCallble() {
+
+    }
 
     @Override
     public void onSuccess(HttpEntity httpEntity) {
-        //流的操作
         InputStream inputStream = null;
         try {
             inputStream = httpEntity.getContent();
@@ -79,7 +116,7 @@ public class DownloadListener implements IDownListener {
         this.receviceTotalLength(totalLength);
         //更新状态
         this.downloadStatusChange(DownloadStatus.downloading);
-        byte[] buffer = new byte[1024];
+        byte[] buffer = new byte[512];
         int count = 0;
         long currentTime = System.currentTimeMillis();
         BufferedOutputStream bos = null;
@@ -87,7 +124,7 @@ public class DownloadListener implements IDownListener {
 
         try {
             if (!makeDir(this.getFile().getParentFile())) {
-                downloadServiceCallable.onDownloadError(downloadItemInfo, 1, "创建文件夹失败");
+                downloadServiceCallable.onDownloadError(downloadItemInfo,1,"创建文件夹失败");
             } else {
                 fos = new FileOutputStream(this.getFile(), true);
                 bos = new BufferedOutputStream(fos);
@@ -102,22 +139,20 @@ public class DownloadListener implements IDownListener {
                         downloadServiceCallable.onDownloadError(downloadItemInfo, 2, "用户暂停了");
                         return;
                     }
-
                     bos.write(buffer, 0, length);
                     getLen += (long) length;
                     receiveLen += (long) length;
                     calcSpeedLen += (long) length;
                     ++count;
-                    //防止调用方法过多
                     if (receiveLen * 10L / totalLength >= 1L || count >= 5000) {
                         currentTime = System.currentTimeMillis();
                         useTime = currentTime - startTime;
                         startTime = currentTime;
-                        //下载速度
                         speed = 1000L * calcSpeedLen / useTime;
                         count = 0;
                         calcSpeedLen = 0L;
                         receiveLen = 0L;
+                        //应该保存数据库
                         this.downloadLengthChange(this.breakPoint + getLen, totalLength, speed);
                     }
                 }
@@ -158,13 +193,12 @@ public class DownloadListener implements IDownListener {
 
     /**
      * 创建文件夹的操作
-     *
      * @param parentFile
      * @return
      */
     private boolean makeDir(File parentFile) {
-        return parentFile.exists() && !parentFile.isFile()
-                ? parentFile.exists() && parentFile.isDirectory() :
+        return parentFile.exists()&&!parentFile.isFile()
+                ?parentFile.exists()&&parentFile.isDirectory():
                 parentFile.mkdirs();
     }
 
@@ -172,13 +206,15 @@ public class DownloadListener implements IDownListener {
     private void downloadLengthChange(final long downlength, final long totalLength, final long speed) {
 
         downloadItemInfo.setCurrentLength(downlength);
-        if (downloadServiceCallable != null) {//克隆模式
-            DownloadItemInfo copyDownItenIfo = downloadItemInfo.copy();
-            synchronized (this.downloadServiceCallable) {
+        if(downloadServiceCallable!=null)
+        {
+            DownloadItemInfo copyDownItenIfo=downloadItemInfo.copy();
+            synchronized (this.downloadServiceCallable)
+            {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        downloadServiceCallable.onCurrentSizeChanged(downloadItemInfo, downlength / totalLength, speed);
+                        downloadServiceCallable.onCurrentSizeChanged(downloadItemInfo,(double) downlength/(double)totalLength,speed);
                     }
                 });
             }
@@ -189,14 +225,15 @@ public class DownloadListener implements IDownListener {
 
     /**
      * 更改下载时的状态
-     *
      * @param downloading
      */
     private void downloadStatusChange(DownloadStatus downloading) {
-        downloadItemInfo.setStatus(downloading);
-        final DownloadItemInfo copyDownloadItemInfo = downloadItemInfo.copy();
-        if (downloadServiceCallable != null) {
-            synchronized (this.downloadServiceCallable) {
+        downloadItemInfo.setStatus(downloading.getValue());
+        final DownloadItemInfo copyDownloadItemInfo=downloadItemInfo.copy();
+        if(downloadServiceCallable!=null)
+        {
+            synchronized (this.downloadServiceCallable)
+            {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
@@ -209,14 +246,15 @@ public class DownloadListener implements IDownListener {
 
     /**
      * 回调  长度的变化
-     *
      * @param totalLength
      */
     private void receviceTotalLength(long totalLength) {
         downloadItemInfo.setCurrentLength(totalLength);
-        final DownloadItemInfo copyDownloadItemInfo = downloadItemInfo.copy();
-        if (downloadServiceCallable != null) {
-            synchronized (this.downloadServiceCallable) {
+        final DownloadItemInfo copyDownloadItemInfo=downloadItemInfo.copy();
+        if(downloadServiceCallable!=null)
+        {
+            synchronized (this.downloadServiceCallable)
+            {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
@@ -239,25 +277,5 @@ public class DownloadListener implements IDownListener {
 
     public File getFile() {
         return file;
-    }
-
-    public void addHttpHeader(Map<String, String> headerMap) {
-
-
-    }
-
-    @Override
-    public void setHttpService(IHttpService httpService) {
-        this.httpService = httpService;
-    }
-
-    @Override
-    public void setCancleCallble() {
-
-    }
-
-    @Override
-    public void setPauseCallble() {
-
     }
 }

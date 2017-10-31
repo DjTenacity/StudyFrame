@@ -6,13 +6,13 @@ import com.dj.studyframe.http.interfaces.IHttpService;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * Comment:
@@ -23,56 +23,86 @@ import java.io.IOException;
  */
 public class JsonHttpService implements IHttpService {
     private IHttpListener httpListener;
-    private HttpClient httpClient = new DefaultHttpClient();
+
+    private HttpClient httpClient=new DefaultHttpClient();
     private HttpPost httpPost;
-
     private String url;
+
     private byte[] requestData;
-
     /**
-     * httpClient 获取网络的回调
+     * httpClient获取网络的回调
      */
-    private HttpResponseHandler httpResponseHandler;
-
+    private HttpRespnceHandler httpRespnceHandler=new HttpRespnceHandler();
     @Override
     public void setUrl(String url) {
-        this.url = url;
+        this.url=url;
     }
 
     @Override
-    public void excute() {/**线程中执行*/
-        httpPost = new HttpPost(url);
-        ByteArrayEntity byteArrayEntity = new ByteArrayEntity(requestData);
-        httpPost.setEntity(byteArrayEntity);
+    public void excute() {
+        httpPost=new HttpPost(url);
+        if(requestData!=null&&requestData.length>0)
+        {
+            ByteArrayEntity byteArrayEntity=new ByteArrayEntity(requestData);
+            httpPost.setEntity(byteArrayEntity);
+        }
 
         try {
-            httpClient.execute(httpPost, httpResponseHandler);
+            httpClient.execute(httpPost,httpRespnceHandler);
         } catch (IOException e) {
             httpListener.onFail();
         }
     }
 
     @Override
-    public void setHttpListener(IHttpListener listener) {
-        this.httpListener = listener;
+    public void setHttpListener(IHttpListener httpListener) {
+        this.httpListener=httpListener;
     }
 
     @Override
     public void setRequestData(byte[] requestData) {
-        this.requestData = requestData;
+        this.requestData=requestData;
     }
 
-    class HttpResponseHandler extends BasicResponseHandler {
+    @Override
+    public void pause() {
+
+    }
+
+    @Override
+    public Map<String, String> getHttpHeardMap() {
+        return null;
+    }
+
+    @Override
+    public boolean cancle() {
+        return false;
+    }
+
+    @Override
+    public boolean isCancle() {
+        return false;
+    }
+
+    @Override
+    public boolean isPause() {
+        return false;
+    }
+
+    private class HttpRespnceHandler extends BasicResponseHandler
+    {
         @Override
         public String handleResponse(HttpResponse response) throws ClientProtocolException {
-            //响应码
-            int code = response.getStatusLine().getStatusCode();
-            if (code == 200) {
+            //响应吗
+            int code=response.getStatusLine().getStatusCode();
+            if(code==200)
+            {
                 httpListener.onSuccess(response.getEntity());
-            } else {
-                //404,500等
+            }else
+            {
                 httpListener.onFail();
             }
+
 
             return null;
         }

@@ -1,4 +1,4 @@
-package com.dj.studyframe.http.entity;
+package com.dj.studyframe;
 
 /**
  * Created by Administrator on 2017/1/16 0016.

@@ -1,6 +1,7 @@
 package com.dj.studyframe.http.download;
 
 import android.util.Log;
+import android.widget.ListView;
 
 import com.dj.studyframe.http.interfaces.IHttpListener;
 import com.dj.studyframe.http.interfaces.IHttpService;
@@ -13,11 +14,11 @@ import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Comment:
@@ -27,79 +28,84 @@ import java.util.Map;
  * @date : 2017/10/22
  */
 public class FileDownHttpService implements IHttpService {
-    private HttpClient httpClient = new DefaultHttpClient();
-    private String url;
+    private static final String TAG = "dongnao";
     /**
      * 即将添加到请求头的信息
      */
-    private Map<String, String> headerMap = Collections.synchronizedMap(new HashMap<String, String>());
+    private Map<String ,String> headerMap= Collections.synchronizedMap(new HashMap<String ,String>());
     /**
-     * 含有请求处理的接口
+     * 含有请求处理的 接口
      */
     private IHttpListener httpListener;
 
-    private byte[] requestData;
+    private HttpClient httpClient=new DefaultHttpClient();
+    private HttpGet httpPost;
+    private String url;
+
+    private byte[] requestDate;
     /**
      * httpClient获取网络的回调
      */
-    private HttpResponseHandler httpRespnceHandler = new HttpResponseHandler();
-    private HttpGet httpGet;
-
+    private  HttpRespnceHandler httpRespnceHandler=new HttpRespnceHandler();
+    /**
+     * 增加方法
+     */
+    private AtomicBoolean pause=new AtomicBoolean(false);
 
     @Override
     public void setUrl(String url) {
-        this.url = url;
+        this.url=url;
     }
 
     @Override
     public void excute() {
-        httpGet = new HttpGet(url);
+        httpPost=new HttpGet(url);
         constrcutHeader();
 //        ByteArrayEntity byteArrayEntity=new ByteArrayEntity(requestDate);
 //        httpPost.setEntity(byteArrayEntity);
         try {
-            httpClient.execute(httpGet, httpRespnceHandler);
+            httpClient.execute(httpPost,httpRespnceHandler);
         } catch (IOException e) {
             httpListener.onFail();
         }
     }
 
+    /**
+     * 1
+     */
     private void constrcutHeader() {
-        Iterator iterator = headerMap.keySet().iterator();
-        while (iterator.hasNext()) {
-            String key = (String) iterator.next();
-            String value = headerMap.get(key);
-            Log.w("请求头信息key", key + "value" + value);
-
-            httpGet.addHeader(key, value);
+        Iterator iterator=headerMap.keySet().iterator();
+        while (iterator.hasNext())
+        {
+            String key= (String) iterator.next();
+            String value=headerMap.get(key);
+            Log.i(TAG," 请求头信息  "+key+"  value "+value);
+            httpPost.addHeader(key,value);
         }
     }
-
-    //将headerMap暴露到DownLoadListener
-
 
     public Map<String, String> getHeaderMap() {
         return headerMap;
     }
 
     @Override
-    public void setHttpListener(IHttpListener listener) {
-        this.httpListener = listener;
+    public void setHttpListener(IHttpListener httpListener) {
+        this.httpListener=httpListener;
     }
 
     @Override
     public void setRequestData(byte[] requestData) {
-        this.requestData = requestData;
+        this.requestDate=requestData;
     }
 
     @Override
     public void pause() {
-
+        pause.compareAndSet(false,true);
     }
 
     @Override
     public Map<String, String> getHttpHeardMap() {
-        return null;
+        return headerMap;
     }
 
     @Override
@@ -111,26 +117,29 @@ public class FileDownHttpService implements IHttpService {
     public boolean isCancle() {
         return false;
     }
-
-
     @Override
     public boolean isPause() {
-        return false;
+        return pause.get();
     }
 
-    class HttpResponseHandler extends BasicResponseHandler {
+    private class HttpRespnceHandler extends BasicResponseHandler
+    {
         @Override
         public String handleResponse(HttpResponse response) throws ClientProtocolException {
-            //响应码
-            int code = response.getStatusLine().getStatusCode();
-            if (code == 200) {
+            //响应吗
+            int code=response.getStatusLine().getStatusCode();
+            if(code==200||206==code)
+            {
                 httpListener.onSuccess(response.getEntity());
-            } else {
-                //404,500等
+            }else
+            {
+                ListView list;
                 httpListener.onFail();
             }
+
 
             return null;
         }
     }
 }
+

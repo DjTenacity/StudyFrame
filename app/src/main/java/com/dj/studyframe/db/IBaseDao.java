@@ -14,7 +14,6 @@ import java.util.List;
 public interface IBaseDao<T> {
 
     /**
-     * Insert long.
      * 插入数据
      *
      * @param entity the entity
@@ -29,7 +28,7 @@ public interface IBaseDao<T> {
      * @param where  the where
      * @return the long
      */
-    int updata(T entity, T where);
+    int update(T entity, T where);
 
     /**
      * 删
@@ -59,4 +58,6 @@ public interface IBaseDao<T> {
     List<T> query(T where, String orderBy, Integer startIndex, Integer limit);
 
     //void query(String sql);,多表查询
+    List<T> query(String sql);
+
 }

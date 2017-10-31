@@ -10,7 +10,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@color/colorAccent"
-        android:onClick="save"
         android:padding="16dp"
         android:text="增"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -20,11 +19,10 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.058" />
 
-      <TextView
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@color/colorAccent"
-        android:onClick="updata"
         android:padding="16dp"
         android:text="改"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -33,6 +31,7 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.058" />
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

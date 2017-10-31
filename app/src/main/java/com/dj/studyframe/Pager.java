@@ -1,4 +1,4 @@
-package com.dj.studyframe.http.entity;
+package com.dj.studyframe;
 
 import java.util.List;
 

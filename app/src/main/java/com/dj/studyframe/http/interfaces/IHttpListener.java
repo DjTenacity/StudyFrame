@@ -14,7 +14,7 @@ import java.util.Map;
 public interface IHttpListener {
 
     /**
-     * 网络访问框架处调用
+     * 网络访问框架处 处理结果 调用
      */
     void onSuccess(HttpEntity httpEntity);
 

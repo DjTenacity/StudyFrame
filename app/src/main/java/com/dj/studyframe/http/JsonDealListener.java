@@ -13,6 +13,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Map;
 
 /**
  * Comment:
@@ -23,40 +24,36 @@ import java.io.InputStreamReader;
  * @date : 2017/10/19
  */
 public class JsonDealListener<M> implements IHttpListener {
-
-    private Class<M> response;
-    /**
-     * 回调调用层的接口
-     **/
+    private Class<M> responceClass;
     private IDataListener<M> dataListener;
+    /**
+     * 获取主线程的Handle
+     * 通过handle切换至主线程
+     */
+    Handler handler=new Handler(Looper.getMainLooper());
 
-    Handler handler = new Handler(Looper.getMainLooper());
-
-    public JsonDealListener(Class<M> response, IDataListener<M> dataListener) {
-        this.response = response;
+    public JsonDealListener(Class<M> responceClass, IDataListener<M> dataListener) {
+        this.responceClass = responceClass;
         this.dataListener = dataListener;
     }
 
     @Override
     public void onSuccess(HttpEntity httpEntity) {
-        InputStream inputStream = null;
+        InputStream inputStream=null;
         try {
-            inputStream = httpEntity.getContent();
-            /**得到网络返回的数据
-             * 子线程*/
-            String content = getContent(inputStream);
-            final M m = JSON.parseObject(content, response);
-
+            inputStream=httpEntity.getContent();
+            String content=getContent(inputStream);
+            final M responce= JSON.parseObject(content,responceClass);
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    dataListener.onSuccess(m);
+                    dataListener.onSuccess(responce);
                 }
             });
-
         } catch (IOException e) {
-            dataListener.onFail();
+            dataListener.onErro();
         }
+
     }
 
     @Override
@@ -64,8 +61,16 @@ public class JsonDealListener<M> implements IHttpListener {
 
     }
 
+    @Override
+    public void addHttpHeader(Map<String, String> headerMap) {
+
+    }
+
+
+
+
     private String getContent(InputStream inputStream) {
-        String content = null;
+        String content=null;
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
@@ -84,7 +89,7 @@ public class JsonDealListener<M> implements IHttpListener {
             } catch (IOException e) {
 
                 System.out.println("Error=" + e.toString());
-                dataListener.onFail();
+                dataListener.onErro();
             } finally {
 
                 try {
@@ -102,9 +107,8 @@ public class JsonDealListener<M> implements IHttpListener {
 
         } catch (Exception e) {
             e.printStackTrace();
-            dataListener.onFail();
+            dataListener.onErro();
         }
         return content;
     }
-
 }

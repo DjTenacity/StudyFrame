@@ -7,10 +7,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-/**
- * Created by Administrator on 2017/1/16 0016.
- */
-
 public class BaseEntity<T> implements Serializable{
     private static final long serialVersionUID = 1L;
     public BaseEntity() {

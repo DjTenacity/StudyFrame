@@ -1,7 +1,5 @@
 package com.dj.studyframe.http.interfaces;
 
-import org.apache.http.HttpEntity;
-
 /**
  * Comment:
  *
@@ -16,5 +14,5 @@ public interface IDataListener<M> {
      */
     void onSuccess(M m);
 
-    void onFail();
+    void onErro();
 }

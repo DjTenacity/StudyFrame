@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.dj.studyframe.http.interfaces.IHttpListener;
 import com.dj.studyframe.http.interfaces.IHttpService;
 
-import java.io.UnsupportedEncodingException;
+import java.util.concurrent.FutureTask;
 
 /**
  * Comment:
@@ -16,25 +16,25 @@ import java.io.UnsupportedEncodingException;
 public class HttpTask<T> implements Runnable {
 
     private IHttpService httpService;
-
-    public HttpTask(RequestHolder<T> requestHolder) {
-
-        httpService = requestHolder.getHttpService();
+    private FutureTask futureTask;
+    public HttpTask(RequestHolder<T> requestHolder)
+    {
+        httpService=requestHolder.getHttpService();
         httpService.setHttpListener(requestHolder.getHttpListener());
         httpService.setUrl(requestHolder.getUrl());
-
         //增加方法
-        IHttpListener httpListener = requestHolder.getHttpListener();
+        IHttpListener httpListener=requestHolder.getHttpListener();
         httpListener.addHttpHeader(httpService.getHttpHeardMap());
-
-        T request = requestHolder.getRequestInfo();
-        if (request != null) {
-            String requestInfo = JSON.toJSONString(request);
-            try {
+        try {
+            T request=requestHolder.getRequestInfo();
+            if(request!=null)
+            {
+                String requestInfo= JSON.toJSONString(request);
                 httpService.setRequestData(requestInfo.getBytes("UTF-8"));
-            } catch (Exception e) {
-                e.printStackTrace();
             }
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
     }
@@ -42,5 +42,31 @@ public class HttpTask<T> implements Runnable {
     @Override
     public void run() {
         httpService.excute();
+    }
+    /**
+     * 新增方法
+     */
+    public void start()
+    {
+        futureTask=new FutureTask(this,null);
+        try {
+            ThreadPoolManager.getInstance().execte(futureTask);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * 新增方法
+     */
+    public  void pause()
+    {
+        httpService.pause();
+        if(futureTask!=null)
+        {
+            ThreadPoolManager.getInstance().removeTask(futureTask);
+        }
+
     }
 }

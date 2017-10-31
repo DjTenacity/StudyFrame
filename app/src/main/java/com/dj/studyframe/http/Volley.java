@@ -19,8 +19,9 @@ public class Volley {
      *
      * @param <T> 请求参数类型
      * @param <M> 响应参数类型
+     *           暴露给调用层
      */
-    public static <T, M> void sendRequset(T requestInf, String url,
+    public static <T, M> void sendRequest(T requestInf, String url,
                                           Class<M> response, IDataListener dataListener) {
         RequestHolder<T> requestHolder = new RequestHolder<>();
         requestHolder.setUrl(url);
@@ -30,13 +31,14 @@ public class Volley {
 
         requestHolder.setHttpService(httpService);
         requestHolder.setHttpListener(httpListener);
+        //将请求参数赋值
         requestHolder.setRequestInfo(requestInf);
 
         HttpTask httpTask = new HttpTask<>(requestHolder);
         try {
             ThreadPoolManager.getInstance().excute(new FutureTask<Object>(httpTask, null));
         } catch (InterruptedException e) {
-            dataListener.onFail();
+            dataListener.onErro();
         }
     }
 }

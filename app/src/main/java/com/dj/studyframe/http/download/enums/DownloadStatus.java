@@ -1,8 +1,4 @@
-package com.dj.studyframe.http.download;
-
-/**
- * Created by Administrator on 2017/1/16 0016.
- */
+package com.dj.studyframe.http.download.enums;
 
 public enum  DownloadStatus {
     waitting(0),
