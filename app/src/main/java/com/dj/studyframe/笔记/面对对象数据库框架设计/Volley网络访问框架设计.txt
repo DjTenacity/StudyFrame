@@ -21,3 +21,13 @@
 单例模式
 策略模式
 生产者消费者模式
+
+
+range
+Content-Range请求头参数,如果没有这个参数说明是请求整个文件
+
+Content-Range:"-514"   只请求前514( 0 -514 )
+Content-Range:"125-514"   只请求前( 125 -514 )
+文件下载了一半   512
+Content-Range:"512-"
+code==200  code=206

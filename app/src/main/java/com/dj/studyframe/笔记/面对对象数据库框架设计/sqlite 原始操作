@@ -1,0 +1,25 @@
+ sqlite 原始修改表操作
+创建表  CREATE TABLE 表名 （列名 数据类型 限定符...）
+CREATE TABLE  Table (ID INTEGER,NAME TEXT);
+修改表  ALTER TABLE ...(命令允许用户重命名或添加新的字段在已有表中，不能从表中删除字段。并且只能在表的末尾添加字段)
+ALTER TABLE tTable RENAME TO MyTable;
+添加一列：ALTER TABLE 表名 ADD COLUMN 列名 数据类型 限定符
+ALTER TABLE MyTable ADD COLUMN AGE INTEGER;
+删除表 DROP TABLE 表名
+DROP TABLE MyTable;
+例：数据库升级时
+更改表结构的方法：
+1.当表中没有任何数据时
+删除表
+DROP TABLE MyTable;
+创建表
+CREATE TABLE MyTable ...
+2.当表中有数据时
+将表名改为临时表
+ALTER TABLE MyTable RENAME TO _temp_MyTable;
+创建新表
+CREATE TABLE MyTable (....);
+导入数据
+INSERT INTO MyTable SELECT .., .. ,“用空来补充原来不存在的数据”  FROM _temp_MyTable;
+删除临时表
+DROP TABLE _temp_MyTable;
